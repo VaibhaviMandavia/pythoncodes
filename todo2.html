@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0;
+                min-width: 250px;
+            }
+            /* include padding and border in an element's total width and height */
+            * {
+                box-sizing: border-box;
+            }
+
+            .header {
+                background-color: rgb(107, 104, 104);
+                color:bisque;
+                padding: 60px 80px;
+                text-align: center;
+                font-style: normal;
+            }
+
+            /* style the input */
+            input {
+                margin: 0;
+                border: none;
+                border-radius: 0;
+                width: 80%;
+                padding: 10px;
+                float: left;
+                font-size: 16px;
+            }
+            
+           
+            .getBtn {
+                padding: 10px;
+                width: 25%;
+                background: #978d8d;
+                color: rgb(17, 9, 1);
+                float:left;
+                text-align: center;
+                font-size: 25px;
+                cursor: pointer;
+                transition: 0.3s;
+                border-radius: 0;
+                border-style: solid;
+            
+            }
+            
+            .texts {
+                
+                margin: 0;
+                border:#887e7e;
+                border-radius:none;
+                width: 30%;
+                padding: 20px;
+                float:inline-end;
+                font-size: 20px;
+                text-align:left;
+                color: rgb(8, 2, 10);
+                <!-- background-color: #b1aeae; -->
+            }
+                
+            
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h2 style="margin:0px;font-size:50px;color: aliceblue;" >MY TO DO'S</h2>
+            <input type="text" id="myInput" value=""
+        placeholder="Enter your todo...">
+        </div>
+        
+        <div id = "mydiv"> 
+            <button class="getBtn" id = "addBtn">Add</button>
+            <button class="getBtn" id = "getBtn">Get All</button>
+            <button class="getBtn" id = "del">Delete</button>
+            <button class="getBtn" id = "updBtn">Update</button>
+        </div>
+        
+        <div class="texts" id="todos">
+        </div>
+    </body>
+
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
+        <script type="text/javascript">
+
+            $(document).ready(function () {
+                  
+                var delete_row = function (id) {
+                    $.get("http://127.0.0.1:5000/deletetodos/" +id, function(data){
+
+                        alert("deleted");
+                        getTodos();
+                        
+                    });
+                };
+                          
+                
+                var getTodos = function() {
+                    $("#todos").html("");
+                    $.get("http://127.0.0.1:5000/gettodos/" , function(data) {
+                        var data_json = JSON.parse(data);
+                        console.log(data);
+                        var i;
+                        for(i=0; i<data_json.length; i++) {
+                            $("#todos").append("<div class='texts'>" + data_json[i] + "<button class='delBtn' id='"+data_json[i][0]+"'> Delete </button></div>");
+                            //$("#todos").append("<div>" + data_json[i] + "<button id="delBtn">Delete</button></div>");
+                            //console.log(data_json[i]);
+                        }
+                    });
+                };
+
+                var updatetodos = function(rid, newvalue) {
+                    $.get("http://127.0.0.1:5000/updatetodos/" +rid+"/"+newvalue, function(data) {
+                        alert("updated value at rowid : "+rid);
+                        getTodos();
+                    })
+                }
+                
+                $("#getBtn").click(function(event) {
+                    getTodos();
+                });
+
+                $('#del').click(function(event) {
+                    var id = prompt("enter the rowid that is to be deleted : ");
+                    delete_row(id);
+                });
+
+                $("#todos").on('click','.delBtn', function (event) {
+                    var id = $(this).attr('id');
+                    delete_row(id);
+
+                });
+                
+                $("#addBtn").click(function() {
+                    var user_todo = $("#myInput").val();
+                    $.get("http://127.0.0.1:5000/addtodos/" + user_todo , function(data){
+                        getTodos();
+                    });
+
+                });
+                
+                $("#updBtn").click(function() {
+                    var user_todo = $("#myInput").val();
+                    var id = prompt("Enter the rowid that is to be updated : ");
+                    updatetodos(id, user_todo);
+                });
+            
+
+            });
+
+        </script>
+    
+    
+</html>
